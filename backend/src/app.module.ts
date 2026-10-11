@@ -12,6 +12,7 @@ import { RolesModule } from './roles/roles.module.js';
 import { PermissionsModule } from './permissions/permissions.module.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { PropertyTypesModule } from './property-types/property-types.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PropertyTypesModule } from './property-types/property-types.module.js';
     PermissionsModule,
     FavoritesModule,
     PropertyTypesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

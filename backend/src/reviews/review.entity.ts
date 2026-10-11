@@ -6,7 +6,6 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { User } from '../users/user.entity.js';
 import { Property } from '../properties/property.entity.js';
 
@@ -15,19 +14,19 @@ export class Review {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int' })
+  @Column()
   rating: number;
 
-  @Column({ type: 'text' })
+  @Column()
   comment: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ type: 'int' })
+  @Column()
   userId: number;
 
-  @Column({ type: 'int' })
+  @Column()
   propertyId: number;
 
   @ManyToOne(() => User)

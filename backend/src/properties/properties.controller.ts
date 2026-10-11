@@ -2,16 +2,26 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { PropertiesService } from './properties.service.js';
-import { Property } from './property.entity.js';
+import { CreatePropertyDto } from './dto/create-property.dto.js';
+import { UpdatePropertyDto } from './dto/update-property.dto.js';
 
 @Controller('properties')
 export class PropertiesController {
-  constructor(private propertiesService: PropertiesService) {}
+  constructor(private readonly propertiesService: PropertiesService) {}
+
+  @Post()
+  create(@Body() createPropertyDto: CreatePropertyDto) {
+    return this.propertiesService.create(createPropertyDto);
+  }
 
   @Get()
   findAll(
@@ -39,8 +49,21 @@ export class PropertiesController {
     return this.propertiesService.findAll(filters);
   }
 
-  @Post()
-  create(@Body() body: Partial<Property>) {
-    return this.propertiesService.create(body);
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.propertiesService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePropertyDto: UpdatePropertyDto,
+  ) {
+    return this.propertiesService.update(id, updatePropertyDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.propertiesService.remove(id);
   }
 }

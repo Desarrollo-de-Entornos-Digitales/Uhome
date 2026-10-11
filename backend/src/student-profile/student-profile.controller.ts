@@ -1,18 +1,46 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { StudentProfileService } from './student-profile.service.js';
-import { StudentProfile } from './student-profile.entity.js';
+import { CreateStudentProfileDto } from './dto/create-student-profile.dto.js';
+import { UpdateStudentProfileDto } from './dto/update-student-profile.dto.js';
 
 @Controller('student-profile')
 export class StudentProfileController {
-  constructor(private studentProfileService: StudentProfileService) {}
+  constructor(private readonly studentProfileService: StudentProfileService) {}
+
+  @Post()
+  create(@Body() createDto: CreateStudentProfileDto) {
+    return this.studentProfileService.create(createDto);
+  }
 
   @Get()
   findAll() {
     return this.studentProfileService.findAll();
   }
 
-  @Post()
-  create(@Body() body: Partial<StudentProfile>) {
-    return this.studentProfileService.create(body);
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.studentProfileService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateStudentProfileDto,
+  ) {
+    return this.studentProfileService.update(id, updateDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.studentProfileService.remove(id);
   }
 }

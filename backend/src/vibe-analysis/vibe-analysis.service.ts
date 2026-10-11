@@ -8,6 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { VibeAnalysis } from './vibe-analysis.entity.js';
 import { Property } from '../properties/property.entity.js';
+import { CreateVibeAnalysisDto } from './dto/create-vibe-analysis.dto.js';
+import { UpdateVibeAnalysisDto } from './dto/update-vibe-analysis.dto.js';
 
 const SCORE_FIELDS = [
   'studentDensity',
@@ -21,23 +23,12 @@ const SCORE_FIELDS = [
 export class VibeAnalysisService {
   constructor(
     @InjectRepository(VibeAnalysis)
-    private vibeRepository: Repository<VibeAnalysis>,
+    private readonly vibeRepository: Repository<VibeAnalysis>,
     @InjectRepository(Property)
-    private propertiesRepository: Repository<Property>,
+    private readonly propertyRepository: Repository<Property>,
   ) {}
 
-  findAll() {
-    return this.vibeRepository.find();
-  }
-
-  async findOne(id: number) {
-    const vibe = await this.vibeRepository.findOneBy({ id });
-    if (!vibe) {
-      throw new NotFoundException('Análisis no encontrado');
-    }
-    return vibe;
-  }
-  private validateScores(data: Partial<VibeAnalysis>) {
+  private validateScores(data: Partial<CreateVibeAnalysisDto>) {
     for (const field of SCORE_FIELDS) {
       const value = data[field];
 
@@ -51,57 +42,82 @@ export class VibeAnalysisService {
     }
   }
 
-  async create(data: Partial<VibeAnalysis>) {
-    if (!data.propertyId) {
+  async create(createDto: CreateVibeAnalysisDto) {
+    if (!createDto.propertyId) {
       throw new BadRequestException('Debes enviar propertyId');
     }
 
     for (const field of SCORE_FIELDS) {
-      if (data[field] === undefined) {
+      if (createDto[field] === undefined) {
         throw new BadRequestException(`Debes enviar ${field}`);
       }
     }
 
-    this.validateScores(data);
+    this.validateScores(createDto);
 
-    const property = await this.propertiesRepository.findOneBy({
-      id: data.propertyId,
+    const property = await this.propertyRepository.findOneBy({
+      id: createDto.propertyId,
     });
     if (!property) {
       throw new NotFoundException('Propiedad no encontrada');
     }
 
     const exists = await this.vibeRepository.findOneBy({
-      propertyId: data.propertyId,
+      propertyId: createDto.propertyId,
     });
     if (exists) {
       throw new ConflictException('Esta propiedad ya tiene un análisis');
     }
 
     const vibe = this.vibeRepository.create({
-      studentDensity: data.studentDensity,
-      nightlife: data.nightlife,
-      studySpots: data.studySpots,
-      quietness: data.quietness,
-      essentialSpots: data.essentialSpots,
-      propertyId: data.propertyId,
+      ...createDto,
       source: 'manual',
     });
 
     return this.vibeRepository.save(vibe);
   }
 
-  async update(id: number, data: Partial<VibeAnalysis>) {
-    this.validateScores(data);
+  findAll() {
+    return this.vibeRepository.find({ relations: { property: true } });
+  }
 
-    const vibe = await this.findOne(id);
+  async findOne(id: number) {
+    const vibe = await this.vibeRepository.findOne({
+      where: { id },
+      relations: { property: true },
+    });
 
-    for (const field of SCORE_FIELDS) {
-      if (data[field] !== undefined) {
-        vibe[field] = data[field];
-      }
+    if (!vibe) {
+      throw new NotFoundException(`Análisis con id ${id} no encontrado`);
     }
 
-    return this.vibeRepository.save(vibe);
+    return vibe;
+  }
+
+  async update(id: number, updateDto: UpdateVibeAnalysisDto) {
+    this.validateScores(updateDto);
+
+    const vibe = await this.vibeRepository.findOneBy({ id });
+
+    if (!vibe) {
+      throw new NotFoundException(`Análisis con id ${id} no encontrado`);
+    }
+
+    Object.assign(vibe, { ...updateDto, id });
+    await this.vibeRepository.save(vibe);
+
+    return this.findOne(id);
+  }
+
+  async remove(id: number) {
+    const vibe = await this.vibeRepository.findOneBy({ id });
+
+    if (!vibe) {
+      throw new NotFoundException(`Análisis con id ${id} no encontrado`);
+    }
+
+    await this.vibeRepository.remove(vibe);
+
+    return { message: 'Análisis eliminado' };
   }
 }

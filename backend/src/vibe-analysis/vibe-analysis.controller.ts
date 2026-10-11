@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -8,11 +9,17 @@ import {
   Post,
 } from '@nestjs/common';
 import { VibeAnalysisService } from './vibe-analysis.service.js';
-import { VibeAnalysis } from './vibe-analysis.entity.js';
+import { CreateVibeAnalysisDto } from './dto/create-vibe-analysis.dto.js';
+import { UpdateVibeAnalysisDto } from './dto/update-vibe-analysis.dto.js';
 
 @Controller('vibe-analysis')
 export class VibeAnalysisController {
-  constructor(private vibeAnalysisService: VibeAnalysisService) {}
+  constructor(private readonly vibeAnalysisService: VibeAnalysisService) {}
+
+  @Post()
+  create(@Body() createDto: CreateVibeAnalysisDto) {
+    return this.vibeAnalysisService.create(createDto);
+  }
 
   @Get()
   findAll() {
@@ -24,16 +31,16 @@ export class VibeAnalysisController {
     return this.vibeAnalysisService.findOne(id);
   }
 
-  @Post()
-  create(@Body() body: Partial<VibeAnalysis>) {
-    return this.vibeAnalysisService.create(body);
-  }
-
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: Partial<VibeAnalysis>,
+    @Body() updateDto: UpdateVibeAnalysisDto,
   ) {
-    return this.vibeAnalysisService.update(id, body);
+    return this.vibeAnalysisService.update(id, updateDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.vibeAnalysisService.remove(id);
   }
 }

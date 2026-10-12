@@ -1,3 +1,4 @@
+import { vi } from 'vitest'; 
 import { Test } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
@@ -9,11 +10,11 @@ describe('AuthService', () => {
   let service: AuthService;
 
   const usersService = {
-    findByEmail: jest.fn(),
+    findByEmail: vi.fn(),
   };
 
   const jwtService = {
-    signAsync: jest.fn(),
+    signAsync: vi.fn(),
   };
 
   const buildUser = async (isActive: boolean) => ({
@@ -27,7 +28,7 @@ describe('AuthService', () => {
   });
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const moduleRef = await Test.createTestingModule({
       providers: [

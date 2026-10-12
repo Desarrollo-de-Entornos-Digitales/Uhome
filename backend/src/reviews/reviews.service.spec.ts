@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
@@ -13,22 +14,22 @@ describe('ReviewsService', () => {
   let service: ReviewsService;
 
   const reviewRepository = {
-    create: jest.fn(),
-    save: jest.fn(),
-    find: jest.fn(),
-    findOne: jest.fn(),
-    findOneBy: jest.fn(),
-    remove: jest.fn(),
+    create: vi.fn(),
+    save: vi.fn(),
+    find: vi.fn(),
+    findOne: vi.fn(),
+    findOneBy: vi.fn(),
+    remove: vi.fn(),
   };
 
   const propertyRepository = {
-    findOneBy: jest.fn(),
+    findOneBy: vi.fn(),
   };
 
   const student = { userId: 1, email: 'ana@test.com', role: 'student' };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const moduleRef = await Test.createTestingModule({
       providers: [

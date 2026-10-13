@@ -50,11 +50,59 @@ export class FavoritesService {
     return this.favoritesRepository.save(favorite);
   }
 
+  findAll() {
+    return this.favoritesRepository.find({ relations: { property: true } });
+  }
+
   findByUser(userId: number) {
     return this.favoritesRepository.find({
       where: { userId },
       relations: { property: true },
     });
+  }
+
+  async findOne(id: number) {
+    const favorite = await this.favoritesRepository.findOne({
+      where: { id },
+      relations: { property: true },
+    });
+
+    if (!favorite) {
+      throw new NotFoundException(`Favorito con id ${id} no encontrado`);
+    }
+
+    return favorite;
+  }
+
+  async update(id: number, propertyId: number) {
+    if (!propertyId) {
+      throw new BadRequestException('Debes enviar propertyId');
+    }
+
+    const favorite = await this.favoritesRepository.findOneBy({ id });
+    if (!favorite) {
+      throw new NotFoundException(`Favorito con id ${id} no encontrado`);
+    }
+
+    const property = await this.propertiesRepository.findOneBy({
+      id: propertyId,
+    });
+    if (!property) {
+      throw new NotFoundException('Propiedad no encontrada');
+    }
+
+    const exists = await this.favoritesRepository.findOneBy({
+      userId: favorite.userId,
+      propertyId,
+    });
+    if (exists && exists.id !== id) {
+      throw new ConflictException('Esta propiedad ya está en favoritos');
+    }
+
+    favorite.propertyId = propertyId;
+    await this.favoritesRepository.save(favorite);
+
+    return this.findOne(id);
   }
 
   async remove(userId: number, propertyId: number) {

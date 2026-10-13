@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -36,6 +37,12 @@ export class FavoritesController {
     return this.favoritesService.add(userId, body.propertyId);
   }
 
+  @Get()
+  @Roles(RoleName.ADMIN)
+  findAll() {
+    return this.favoritesService.findAll();
+  }
+
   @Get('user/:userId')
   findByUser(
     @Param('userId', ParseIntPipe) userId: number,
@@ -44,6 +51,31 @@ export class FavoritesController {
     checkOwnerOrAdmin(req.user, userId);
 
     return this.favoritesService.findByUser(userId);
+  }
+
+  @Get(':id')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const favorite = await this.favoritesService.findOne(id);
+
+    checkOwnerOrAdmin(req.user, favorite.userId);
+
+    return favorite;
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { propertyId: number },
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const favorite = await this.favoritesService.findOne(id);
+
+    checkOwnerOrAdmin(req.user, favorite.userId);
+
+    return this.favoritesService.update(id, body.propertyId);
   }
 
   @Delete('user/:userId/property/:propertyId')

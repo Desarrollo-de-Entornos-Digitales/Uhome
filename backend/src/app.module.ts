@@ -13,19 +13,33 @@ import { PermissionsModule } from './permissions/permissions.module.js';
 import { FavoritesModule } from './favorites/favorites.module.js';
 import { PropertyTypesModule } from './property-types/property-types.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { PassportGlobalModule } from './auth/passport-global.module.js';
+
+const databaseUrl = process.env.DATABASE_URL;
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5433,
-      username: 'uhome',
-      password: 'uhome',
-      database: 'uhome',
-      autoLoadEntities: true,
-      synchronize: true,
-    }),
+    TypeOrmModule.forRoot(
+      databaseUrl
+        ? {
+            type: 'postgres',
+            url: databaseUrl,
+            ssl: { rejectUnauthorized: false },
+            autoLoadEntities: true,
+            synchronize: true,
+          }
+        : {
+            type: 'postgres',
+            host: 'localhost',
+            port: 5433,
+            username: 'uhome',
+            password: 'uhome',
+            database: 'uhome',
+            autoLoadEntities: true,
+            synchronize: true,
+          },
+    ),
+    PassportGlobalModule,
     UsersModule,
     StudentProfileModule,
     PropertiesModule,

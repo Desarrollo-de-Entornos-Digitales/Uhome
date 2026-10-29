@@ -1,3 +1,4 @@
+
 export class UpdatePropertyDto {
   name?: string;
   description?: string;
@@ -8,4 +9,6 @@ export class UpdatePropertyDto {
   propertyTypeId?: number;
   distanceToCampus?: number;
   available?: boolean;
+  characteristics?: string[];
+  contractConditions?: string;
 }

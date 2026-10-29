@@ -1,3 +1,4 @@
+
 import {
   Column,
   Entity,
@@ -45,6 +46,12 @@ export class Property {
 
   @Column()
   available: boolean;
+
+  @Column({ type: 'simple-array', nullable: true })
+  characteristics: string[];
+
+  @Column({ type: 'text', nullable: true })
+  contractConditions: string;
 
   @ManyToMany(() => Amenity)
   @JoinTable()

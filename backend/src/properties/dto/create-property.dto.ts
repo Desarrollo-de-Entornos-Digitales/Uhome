@@ -1,3 +1,4 @@
+
 export class CreatePropertyDto {
   name: string;
   description: string;
@@ -8,4 +9,6 @@ export class CreatePropertyDto {
   propertyTypeId: number;
   distanceToCampus: number;
   available: boolean;
+  characteristics?: string[];
+  contractConditions?: string;
 }

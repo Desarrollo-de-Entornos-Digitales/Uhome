@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import PropertyMap from "@/components/PropertyMap";
+import PropertyMapLoader from "@/components/PropertyMapLoader";
 import ProgressBar from "@/components/ProgressBar";
 import Alert from "@/components/Alert";
 import {
@@ -83,7 +83,9 @@ export default async function PropertyDetailPage({ params }: PageProps) {
           <h2 className="mb-3 text-xl font-bold">Sobre esta vivienda</h2>
           <p className="leading-7 text-gray-600">{property.description}</p>
           <p className="mt-4 text-sm text-gray-600">
-            Distancia al campus: {property.distanceToCampus} km
+            Distancia al campus: {(property.distanceToCampus / 1000).toLocaleString("es-CO", {
+  maximumFractionDigits: 2,
+})} km
           </p>
         </section>
 
@@ -139,7 +141,7 @@ export default async function PropertyDetailPage({ params }: PageProps) {
 
         <section className="mb-6 rounded-2xl border bg-white p-6">
           <h2 className="mb-4 text-xl font-bold">Ubicación</h2>
-          <PropertyMap
+          <PropertyMapLoader
             latitude={property.latitude}
             longitude={property.longitude}
             name={property.name}

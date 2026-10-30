@@ -377,7 +377,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/properties",
+              "raw": "{{baseUrl}}/properties",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -385,6 +385,16 @@
               "port": "3000",
               "path": [
                 "properties"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -463,6 +473,16 @@
                 "properties",
                 "{{propertyId}}"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
           },
           "response": []
@@ -485,6 +505,16 @@
               "path": [
                 "properties",
                 "{{propertyId}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
           },
@@ -1293,7 +1323,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000"
+      "value": "http://localhost:3001"
     },
     {
       "key": "token",

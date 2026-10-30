@@ -61,7 +61,7 @@ npm run start:dev
 docker exec -i uhome-postgres psql -U uhome -d uhome < backend/seed/seed.sql
 ```
 
-La API queda en `http://localhost:3000`.
+La API queda en `http://localhost:3001`.
 
 El script `backend/seed/seed.sql` borra y vuelve a crear usuarios, propiedades, amenities, perfiles, reviews, análisis de ambiente y favoritos, por lo que se puede ejecutar varias veces.
 
@@ -95,13 +95,13 @@ La contraseña de todas es `Uhome1234`.
 1. Iniciar sesión:
 
 ```bash
-curl -X POST http://localhost:3000/auth/login -H "Content-Type: application/json" -d '{"email":"admin@uhome.com","password":"Uhome1234"}'
+curl -X POST http://localhost:3001/auth/login -H "Content-Type: application/json" -d '{"email":"admin@uhome.com","password":"Uhome1234"}'
 ```
 
 2. Copiar el `access_token` de la respuesta (dura 1 hora) y enviarlo en las rutas protegidas:
 
 ```bash
-curl http://localhost:3000/roles -H "Authorization: Bearer EL_TOKEN"
+curl http://localhost:3001/roles -H "Authorization: Bearer EL_TOKEN"
 ```
 
 Roles:
@@ -221,7 +221,7 @@ Un usuario nuevo se registra siempre como `student`. Solo un admin puede cambiar
 El archivo `backend/postman/uhome.postman_collection.json` contiene las rutas de la aplicación.
 
 1. En Postman, usar **Import** y seleccionar el archivo.
-2. Configurar la variable `baseUrl`: `http://localhost:3000` en local, o `https://uhome-3e5i.onrender.com` para el despliegue.
+2. Configurar la variable `baseUrl`: `http://localhost:3001` en local, o `https://uhome-3e5i.onrender.com` para el despliegue.
 3. Ejecutar primero el login para obtener el token y luego el resto de las peticiones.
 
 ## Pruebas unitarias

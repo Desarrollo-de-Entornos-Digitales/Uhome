@@ -23,9 +23,7 @@ import type { AuthenticatedRequest } from '../auth/auth-request.interface.js';
 @Controller('student-profile')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class StudentProfileController {
-  constructor(
-    private readonly studentProfileService: StudentProfileService,
-  ) {}
+  constructor(private readonly studentProfileService: StudentProfileService) {}
 
   @Post()
   @Roles(RoleName.STUDENT, RoleName.ADMIN)
@@ -44,6 +42,11 @@ export class StudentProfileController {
   @Roles(RoleName.ADMIN)
   findAll() {
     return this.studentProfileService.findAll();
+  }
+
+  @Get('me')
+  findMine(@Req() req: AuthenticatedRequest) {
+    return this.studentProfileService.findByUserId(req.user.userId);
   }
 
   @Get(':id')

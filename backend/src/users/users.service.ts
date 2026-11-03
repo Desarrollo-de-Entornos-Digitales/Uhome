@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import bcrypt from 'bcryptjs';
+
 import { User } from './user.entity.js';
 import { Role } from '../roles/role.entity.js';
 import { CreateUserDto } from './dto/create-user.dto.js';
@@ -18,20 +19,26 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
   ) {}
 
   private hidePassword(user: User) {
     const { password, ...result } = user;
+
     return result;
   }
 
   private async findEntity(id: number) {
-    const user = await this.usersRepository.findOneBy({ id });
+    const user = await this.usersRepository.findOneBy({
+      id,
+    });
 
     if (!user) {
-      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+      throw new NotFoundException(
+        `Usuario con id ${id} no encontrado`,
+      );
     }
 
     return user;
@@ -49,45 +56,66 @@ export class UsersService {
       );
     }
 
-    const exists = await this.usersRepository.findOneBy({
-      email: createUserDto.email,
-    });
+    const exists =
+      await this.usersRepository.findOneBy({
+        email: createUserDto.email,
+      });
+
     if (exists) {
-      throw new ConflictException('El correo ya está registrado');
+      throw new ConflictException(
+        'El correo ya está registrado',
+      );
     }
 
-    const studentRole = await this.rolesRepository.findOneBy({
-      name: RoleName.STUDENT,
-    });
+    const studentRole =
+      await this.rolesRepository.findOneBy({
+        name: RoleName.STUDENT,
+      });
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      10,
+    );
 
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
       roleId: studentRole?.id,
     });
-    const saved = await this.usersRepository.save(user);
+
+    const saved =
+      await this.usersRepository.save(user);
 
     return this.findOne(saved.id);
   }
 
   async findAll() {
     const users = await this.usersRepository.find({
-      relations: { role: true },
+      relations: {
+        role: true,
+      },
     });
 
-    return users.map((user) => this.hidePassword(user));
+    return users.map((user) =>
+      this.hidePassword(user),
+    );
   }
 
   async findOne(id: number) {
-    const user = await this.usersRepository.findOne({
-      where: { id },
-      relations: { role: true },
-    });
+    const user =
+      await this.usersRepository.findOne({
+        where: {
+          id,
+        },
+        relations: {
+          role: true,
+        },
+      });
 
     if (!user) {
-      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+      throw new NotFoundException(
+        `Usuario con id ${id} no encontrado`,
+      );
     }
 
     return this.hidePassword(user);
@@ -95,54 +123,137 @@ export class UsersService {
 
   findByEmail(email: string) {
     return this.usersRepository.findOne({
-      where: { email },
-      relations: { role: true },
+      where: {
+        email,
+      },
+      relations: {
+        role: true,
+      },
     });
   }
 
   findForAuth(id: number) {
     return this.usersRepository.findOne({
-      where: { id },
-      relations: { role: true },
+      where: {
+        id,
+      },
+      relations: {
+        role: true,
+      },
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async setPasswordResetToken(
+    id: number,
+    tokenHash: string,
+    expiresAt: Date,
+  ) {
     const user = await this.findEntity(id);
 
-    const data = { ...updateUserDto, id };
+    user.passwordResetTokenHash = tokenHash;
+    user.passwordResetExpiresAt = expiresAt;
+
+    await this.usersRepository.save(user);
+
+    return user;
+  }
+
+  findByPasswordResetTokenHash(
+    tokenHash: string,
+  ) {
+    return this.usersRepository.findOne({
+      where: {
+        passwordResetTokenHash: tokenHash,
+      },
+    });
+  }
+
+  async resetPassword(
+    id: number,
+    password: string,
+  ) {
+    const user = await this.findEntity(id);
+
+    user.password = await bcrypt.hash(
+      password,
+      10,
+    );
+
+    user.passwordResetTokenHash = null;
+    user.passwordResetExpiresAt = null;
+
+    await this.usersRepository.save(user);
+
+    return {
+      message:
+        'Contraseña actualizada correctamente',
+    };
+  }
+
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+  ) {
+    const user = await this.findEntity(id);
+
+    const data = {
+      ...updateUserDto,
+      id,
+    };
 
     if (updateUserDto.password) {
-      data.password = await bcrypt.hash(updateUserDto.password, 10);
+      data.password = await bcrypt.hash(
+        updateUserDto.password,
+        10,
+      );
     }
 
     Object.assign(user, data);
+
     await this.usersRepository.save(user);
 
     return this.findOne(id);
   }
 
-  async setRole(id: number, roleId: number) {
+  async setRole(
+    id: number,
+    roleId: number,
+  ) {
     const user = await this.findEntity(id);
 
-    const role = await this.rolesRepository.findOneBy({ id: roleId });
+    const role =
+      await this.rolesRepository.findOneBy({
+        id: roleId,
+      });
+
     if (!role) {
-      throw new NotFoundException('Rol no encontrado');
+      throw new NotFoundException(
+        'Rol no encontrado',
+      );
     }
 
     user.roleId = role.id;
+
     await this.usersRepository.save(user);
 
     return this.findOne(id);
   }
 
-  async setActive(id: number, isActive: boolean) {
+  async setActive(
+    id: number,
+    isActive: boolean,
+  ) {
     const user = await this.findEntity(id);
 
     user.isActive = isActive;
+
     await this.usersRepository.save(user);
 
-    return { id: user.id, email: user.email, isActive: user.isActive };
+    return {
+      id: user.id,
+      email: user.email,
+      isActive: user.isActive,
+    };
   }
 
   async remove(id: number) {
@@ -150,6 +261,8 @@ export class UsersService {
 
     await this.usersRepository.remove(user);
 
-    return { message: 'Usuario eliminado' };
+    return {
+      message: 'Usuario eliminado',
+    };
   }
 }

@@ -34,4 +34,16 @@ export class User {
   @ManyToOne(() => Role, { nullable: true })
   @JoinColumn({ name: 'roleId' })
   role: Role;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  passwordResetTokenHash: string | null;
+
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+  })
+  passwordResetExpiresAt: Date | null;
 }
